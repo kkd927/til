@@ -122,7 +122,7 @@ console.log(objA == objC); // true
 
 ```javascript
 var foo = {
-	name: 'foo',
+    name: 'foo',
     age: 30
 };
 
