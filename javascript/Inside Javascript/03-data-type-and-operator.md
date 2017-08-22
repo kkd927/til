@@ -137,3 +137,115 @@ ECMAScript 명세서에는 자바스크립트의 __모든 객체는 자신의 �
 모든 객체의 프로토타입은 자바스크립트의 룰에 따라 객체를 생성할 때 결정된다. 객체 리터럴 방식으로 생성된 객체의 경우 Object.prototype 객체가 프로토타입 객체가 된다.
 
 객체를 생성할 때 결정된 프로토타입 객체는 임의의 다른 객체로 변경하는 것도 가능하다. 즉, 부모 객체를 동적으로 바꿀 수 있다. 자바스크립트에서는 이러한 특징을 활용해서 객체 상속 등의 기능을 구현한다.
+
+배열은 자바스크립트 객체의 특별한 형태다. 순차적으로 값을 넣을 필요 없이 아무 인덱스 위치에나 값을 동적으로 추가할 수 있다.
+
+```javascript
+var arr = [];
+console.log(arr[0]); // undefined
+
+arr[0] = 1;
+arr[1] = 2;
+arr[4] = 5;
+
+console.log(arr); // 1, 2, undefined, undefined, 5
+```
+
+자바스크립트의 모든 배열은 length 프로퍼티가 있다. lenght 프로퍼티는 배열 내에 가장 큰 인덱스에 1을 더한 값이다. 배열의 length 프로퍼티는 코드를 통해 명시적으로 값을 변경할 수 도 있다. 이때 length 프로퍼티를 벗어나는 실제 값은 삭제된다.
+
+```javascript
+var arr = [];
+console.log(arr.length); // 0
+
+arr[0] = 1;
+arr[1] = 2;
+arr[2] = 3;
+arr[99] = 100;
+console.log(arr.length); // 100
+
+arr.length = 2;
+console.log(arr); // [1, 2]
+console.log(arr[2]); // undefined
+```
+
+자바스크립트에서는 배열 역시 객체다. 하지만 배열은 일반 객체와는 약간 차이가 있다. 배열 객체는 length 프로퍼티가 있지만 일반 객체는 없다.
+
+객체 리터럴 방식으로 생성한 객의 경우, 객체 표준 메서드를 저장하고 있는 __Object.prototype__ 객체가 프로토타입이다. 반면 배열의 경우 __Array.prototype__ 객체가 부모 객체인 프로토타입이 된다.
+
+배열도 객체이므로, 인덱스가 숫자인 배열 원소 이외에도 객체처럼 동적으로 프로퍼티를 추가할 수 있다. 하지만 __배열의 length 프로퍼티는 배열 원소의 가장 큰 인덱스가 변했을 경우만 변경된다.__
+
+```Javascript
+var arr = [1, 2, 3];
+console.log(arr.length); // 3
+
+// 프로퍼티 동적 추가
+arr.color = 'blue';
+arr.name = 'number';
+console.log(arr.length); // 3 (변화없음)
+
+// 배열 원소 추가
+arr[3] = 4;
+console.log(arr.length); // 4
+```
+
+배열도 객체이므로 for in 문을 사용해서 배열 내의 모든 프로퍼티를 열거할 수 있지만, 이렇게 되면 불필요한 프로퍼티가 출력될 수 있으므로 되도록 for 문을 사용하는 것이 좋다.
+
+```javascript
+for (var prop in arr) {
+    console.log(prop, arr[prop]);
+}
+
+// 0 1
+// 1 2
+// 2 3
+// 3 4
+// color blue
+// name number
+
+for (var i=0; i<arr.length; i++) {
+    console.log(prop, arr[i]);
+}
+
+// 0 1
+// 1 2
+// 2 3
+// 3 4
+```
+
+또한 배열 요소나 프로퍼티를 삭제하는데 delete 연산자를 사용할 수 있다.
+
+```javascript
+var arr = [1, 2, 3, 4];
+delete arr[2];
+
+console.log(arr); // [1, 2, undefined, 4]
+console.log(arr.length); // 4
+```
+
+배열에서 요소들을 완전히 삭제할 경우 slice() 배열 메서드를 사용하면 된다.
+
+```javascript
+var arr = [1, 2, 3, 4];
+arr.slice(2, 1);
+
+console.log(arr); // [1, 2, 4]
+console.log(arr.length); // 3
+```
+
+배열 리터럴도 결국 자바스크립트 기본 제공 Array() 생성자 함수로 배열을 생성하는 과정을 단순화시킨 것이다. 일부 개발자들은 배열 리터럴 대신 Array() 생성자 함수로 생성하기도 한다.
+
+Array()
+- 인자 1개이고 숫자일 경우 : 호출된 인자를 length로 갖는 빈 배열 생성
+- 그 외 : 호출된 인자를 요소로 갖는 배열 생성
+
+```javascript
+var foo = new Array(3);
+
+console.log(foo); // [undefined, undefined, undefined]
+console.log(foo.length); // 3
+
+var bar= new Array(1, 2, 3);
+
+console.log(bar); // [1, 2, 3]
+console.log(bar.length); // 3
+```
