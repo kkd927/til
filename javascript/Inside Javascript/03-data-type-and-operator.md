@@ -50,3 +50,11 @@ var foo = {
 console.log(typeof foo); // object
 console.log(foo); // { name: 'foo', age: '30', gender: 'male' }
 ```
+객체 프로퍼티는 대괄호([]) 표기법, 마침표(.) 표기법을 통해 접근할 수 있다.
+
+```javascript
+console.log(foo.name); // foo
+console.log(foo['name']); // foo
+```
+
+대괄호 표기법에서 접근하려는 프로퍼티 이름을 문자열 형태로 만들지 않으면 모든 자바스크립트 객체에서 호출 가능한 toString()이라는 메서드를 자동으로 호출해서 이를 문자열로 바꾸려는 시도를 한다.
