@@ -249,3 +249,66 @@ var bar= new Array(1, 2, 3);
 console.log(bar); // [1, 2, 3]
 console.log(bar.length); // 3
 ```
+
+length 프로퍼티를 가진 일반 객체를 __유사 배열 객체(arry-like objects)__ 라고 부른다. 유사 배열 객체는 apply() 메서드를 사용하여 배열 메서드를 사용하는 것이 가능하다.
+
+```javascript
+var arr = ['bar'];
+var obj = {
+    name : 'foo',
+    length : 1
+};
+
+arr.push('baz');
+console.log(arr); // ['bar', 'baz']
+
+obj.push('baz'); // error
+
+Array.prototype.push.apply(obj, ['baz']);
+console.log(obj); // {'1': 'baz', name: 'foo', length: 2}
+```
+
+자바스크립트는 숫자, 문자열, 불린값에 대해 각 타입별로 호출 가능한 표준 메서드를 정의하고 있다. 이들 기본 값은 메서드 처리 순간에 객체로 변환된 다음 각 타입별 표준 메서드를 호출하게 된다.
+
+```javascript
+var num = 0.5;
+console.log(num.toExponential(1)); // '5.0e-1'
+
+console.log("test".charAt(2)); // 's'
+```
+
+typeof 연산자는 피연산자의 타입을 문자열 형태로 리턴한다. null과 배열은 'object', 함수는 'function'이다.
+
+| 타입 형태 | 타입 | 연산자 결과 |
+|:------:|:----:|:--------:|
+| 기본 타입 | 숫자 | 'number' |
+| 기본 타입 | 문자열 | 'string' |
+| 기본 타입 | 불린값 | 'boolean' |
+| 기본 타입 | null | 'object' |
+| 기본 타입 | undefined | 'undefined' |
+| 참조 타입 | 객체 | 'object' |
+| 참조 타입 | 배열 | 'object' |
+| 참조 타입 | 함수 | 'function' |
+
+== (동등) 연산자는 비교하려는 피연산자의 타입이 다를 경우에 타입 변환을 거친 다음 비교한다. 대두분의 자바스크립트 코딩 가이드에서 == 연산자로 비교하는 것을 추천하지 않는다.
+
+```javascript
+console.log(1 == '1'); // true
+console.log(1 === '1'); // false
+```
+
+!! 연산자는 피연산자를 불린값으로 변환한다.
+
+```javascript
+console.log(!!0); // false
+console.log(!!1); // true
+console.log(!!'string'); // true
+console.log(!!''); // false
+console.log(!!true); // true
+console.log(!!false); // false
+console.log(!!null); // false
+console.log(!!undefined); // false
+console.log(!!{}); // true
+console.log(!![1, 2, 3]); // true
+console.log(!![]); // true
+```
