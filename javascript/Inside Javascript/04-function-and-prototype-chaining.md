@@ -140,3 +140,51 @@ console.log(add.status); // 'OK'
 ```
 
 위의 예제는 함수에 동적으로 프로퍼티를 생성할 수 있다는 것을 보여준다. 함수 코드는 함수 객체의 __[[Code]] 내부 프로퍼티__ 에 자동으로 저장된다(ECMAScript 명세).
+
+함수는 일반 객체와는 다르게 추가로 함수 객체만의 표준 프로퍼티가 정의되어 있다. ECMA5 스크립트 명세서에는 모든 함수가 __length__ 와 __prototype 프로퍼티__ 를 가져야 한다고 기술하고 있다. 
+
+그 외에 name, caller, arguments, \_\_proto\_\_ 프로퍼티가 있으나 이들은 ECMA 표준이 아니다. ECMA 표준에서는 arguments 프로퍼티와 같은 이름으로 __arguments 객체__ 를 정의하고 있다.
+
+- name : 함수의 이름
+- caller : 자신을 호출한 함수
+- arguments : 함수를 호출할 때 전달된 인자값
+- \_\_proto\_\_ : 객체 자신이 가리키는 프로토타입
+
+*모든 함수들의 부모 객체는 Function Prototype 객체이다.* 그런데 ECMA 명세서에는 __Function.prototype__ 은 함수라고 정의하고 있다. 대신 예외적으로 Function.prototype 함수 객체의 부모는 자바스크립트의 모든 객체의 조상격인 Object.prototype 객체라고 설명하고 있다. Function.prototype 객체가 가지는 프로퍼티나 메서드는 다음과 같다.
+
+- constructor 프로퍼티
+- toString() 메서드
+- apply(thisArg, argArray) 메서드
+- call(thisArg, [,arg1 [,arg2, ]]) 메서드
+- bind(thisArg, [,arg1 [,arg2, ]]) 메서드
+
+함수 객체의 __length 프로퍼티__ 는 앞서 설명했듯이 ECMAScript에서 정한 모든 함수가 가져야 하는 표준 프로퍼티로서, 함수가 정상적으로 실행될 때 기대되는 인자의 개수를 나타낸다.
+
+```javascript
+function func0() {}
+function func1(x) { return x; }
+function func2(x, y) { return x + y; }
+function func3(x, y, z) { return x + y + z; }
+
+console.log(func0.length); // 0
+console.log(func1.length); // 1
+console.log(func2.length); // 2
+console.log(func3.length); // 3
+```
+
+모든 함수는 객체로서 __prototype 프로퍼티__ 를 가진다. 
+
+> 모든 객체에 있는 내부 프로퍼티인 __[[Prototype]]__ 는 객체 입장에서 자신의 부모 역할을 하는 프로토타입 객체를 가리키는 반면에, 함수가 가지는 __prototype 프로퍼티__ 는 이 함수가 생성자로 사용될 때 이 함수를 통해 생성된 객체의 부모 역할을 하는 프로토타입 객체를 가리킨다.
+
+prototype 프로퍼티는 함수가 생성될 때 만들어지며, __constructor 프로퍼티__ 하나만 있는 객체를 가리킨다. 그리고 constructor 프로퍼티는 자신과 연결된 함수를 가리킨다. *즉, 자바스크립트에서는 함수를 생성할 때, 함수 자신과 연결된 프로토타입 객체를 동시에 생성하며, 이 둘은 prototype과 constructor라는 프로퍼티로 서로를 참조하게 된다.*
+
+> 함수의 prototype 프로퍼티가 가리키는 프로토타입 객체는 일반적으로 따로 네이밍하지 않고, 자신과 연결된 함수의 prototype 프로퍼티 값을 그대로 이용한다. 가령 add() 함수의 프로토타입 객체는 add.prototype이 된다.
+
+```javascript
+function myFunction() {
+    return true;
+}
+
+console.dir(myFunction.prototype); // myFunction 함수의 프로토타입 객체
+console.dir(myFunction.prototype.constructor); // myFunction 함수
+```
