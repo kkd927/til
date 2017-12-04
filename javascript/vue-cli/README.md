@@ -1,10 +1,12 @@
+## [vue-cli] Webpack 템플릿으로 vue.js 개발환경 구축하기
+
 ### Introduction
 
 이 환경 설정은 대형 프로젝트에 적합하며, Webpack 과 `vue-loader`에 대한 사전지식이 있다고 가정하에 진행됩니다. 시작하기 전에 [vue-loader 문서](https://vue-loader.vuejs.org/kr/start/spec.html)를 먼저 읽어보는 것을 추천합니다.
 
 Vue 프로젝트 템플릿은 빠르게 어플리케이션 코드를 작성할 수 있도록 대부분의 기능을 갖춘 개발 도구 설정을 제공합니다. `vue list`를 실행하여 사용가능한 공식 템플릿을 확인할 수 있습니다. 
 
-현재 사용할 수 있는 템플릿 목록은 다음과 같으며 이 튜토리얼에서는 webpack 템플릿을 이용하여 진행합니다. 만약 단순히 vue-loader를 경험하려고 하거나 빠른 프로토타입을 만드려는 상황이라면 [webpack-simple](https://github.com/vuejs-templates/webpack-simple) 템플릿을 사용하길 추천드립니다.
+현재 사용할 수 있는 템플릿 목록은 다음과 같으며 이 튜토리얼에서는 **webpack 템플릿**을 이용하여 진행합니다. 만약 단순히 vue-loader를 경험하려고 하거나 빠른 프로토타입을 만드려는 상황이라면 [webpack-simple](https://github.com/vuejs-templates/webpack-simple) 템플릿을 사용하길 추천드립니다.
 
 - [webpack](https://github.com/vuejs-templates/webpack) - hot-reload, linting, 테스트 및 CSS 추출 기능을 갖춘 대부분의 기능을 갖추고 있는 Webpack + vue-loader 설정입니다.
 - [webpack-simple](https://github.com/vuejs-templates/webpack-simple) - 단순히 Webpack과 vue-loader만 포함합니다. 빠르게 프로토타입을 만들 때 사용합니다.
