@@ -1,6 +1,6 @@
 ### Introduction
 
-이 튜토리얼은 대형 프로젝트에 적합하며, Webpack 과 `vue-loader`에 대한 사전지식이 있다고 가정하에 진행됩니다. 시작하기 전에 [vue-loader 문서](https://vue-loader.vuejs.org/kr/start/spec.html)를 먼저 읽어보는 것을 추천합니다.
+이 환경 설정은 대형 프로젝트에 적합하며, Webpack 과 `vue-loader`에 대한 사전지식이 있다고 가정하에 진행됩니다. 시작하기 전에 [vue-loader 문서](https://vue-loader.vuejs.org/kr/start/spec.html)를 먼저 읽어보는 것을 추천합니다.
 
 Vue 프로젝트 템플릿은 빠르게 어플리케이션 코드를 작성할 수 있도록 대부분의 기능을 갖춘 개발 도구 설정을 제공합니다. `vue list`를 실행하여 사용가능한 공식 템플릿을 확인할 수 있습니다. 
 
@@ -54,6 +54,8 @@ bash$ vue init webpack vue-test
 
    Documentation can be found at https://vuejs-templates.github.io/webpack
 ```
+
+`npm run dev` 까지 실행하였다면 기본 준비는 모두 끝납니다. 커맨드 화면에 `Your application is running here: http://localhost:8080`가 출력되는 것을 확인하실 수 있습니다. 브라우저에서 `http://localhost:8080`에 접속하면 자동으로 구성된 화면이 뜨는 것을 볼 수 있습니다. 이제부터 추가설명을 진행할 것입니다.
 
 ### 프로젝트 구조
 
@@ -163,7 +165,87 @@ eslint를 실행하여 코드의 린트 에러를 보여줍니다. 자세한 내
 
 ### 정적 자원 처리
 
-프로젝트 구조를 보면 정적 자원들을 위한 `src/assets`와 `static/` 2개의 디렉터리가 잇는 것을 확인할 수 있습니다. 이 둘의 차의점은 무엇일까요? 웹펙에 의해 처리되느냐 안되느냐의 차이점입니다.
+프로젝트 구조를 보면 정적 자원들을 위한 `src/assets`와 `static/` 2개의 디렉터리가 잇는 것을 확인할 수 있습니다. 이 둘의 차의점은 웹펙에 의해 처리되느냐 안되느냐의 차이점입니다.
+
+**웹팩에 처리되는 자원들**
+
+우선 웹팩이 정적 자원들을 어떻게 처리하는지 이해할 필요가 있습니다. `*.vue` 컴포넌트 안에서 모든 html 템플릿과 CSS들은 URL 경로를 찾기 위해 `vue-html-loader`와 `css-loader`에 의해 분석됩니다. 예를들어 `<img src="./logo.png">`, `background: url(./logo.png)`에서 `"./logo.png"`는 상대 경로를 나타내며 모듈 디펜던시로 웹팩에 의해 처리됩니다.
+
+왜냐하면 `logo.png`는 자바스크립트가 아니기 때문에 모듈 디펜던시로 취급되어 `url-loader`와 `file-loader`로 처리할 필요가 있습니다. 이 로더들은 기본적으로 탑재되어 있기 때문에 배포를 위해 상대/모듈 경로를 신경쓸 필요가 없습니다.
+
+**실제 정적 자원들**
+
+위와는 반대로 `static/`에 위치하는 파일들은 웹팩에 의해 처리되지 않습니다. 이들은 최종 경로에 같은 이름으로 복사됩니다. `config.js`에 있는 `build.assetsPublicPath`와 `build.assetsSubDirectory`에 의해 결정되어지는 절대경로를 이용하여 이 파일들에 접근할 수 있습니다.
+
+아래는 기본 값으로 설정되어 있는 예시입니다.
+
+```javascript
+// config/index.js
+module.exports = {
+  // ...
+  build: {
+    assetsPublicPath: '/',
+    assetsSubDirectory: 'static'
+  }
+}
+```
+
+위의 구성을 따르면 `static/`에 위치하는 파일들은 절대 경로인 `/static/[filename]`으로 접근할 수 있습니다. 만약 `assetsSubDirectory`를 assets으로 바꾼다면 `/assets/[filename]`으로 파일에 접근할 수 있습니다.
+
+자세한 내용은 [Integrating with Backend Framework](https://vuejs-templates.github.io/webpack/backend.html)를 참고하세요.
+
+### 환경 변수
+
+보통 test, development, production 환경에 따라 다른 구성이 필요할 때가 많습니다. 자바 개발자라면 maven profile와 같다고 생각하시면 됩니다.
+
+예를들어 아래와 같이 설정하면
+
+```javascript
+// config/prod.env.js
+module.exports = {
+  NODE_ENV: '"production"',
+  DEBUG_MODE: false,
+  API_KEY: '"..."' // this is shared between all environments
+}
+
+// config/dev.env.js
+module.exports = merge(prodEnv, {
+  NODE_ENV: '"development"',
+  DEBUG_MODE: true // this overrides the DEBUG_MODE value of prod.env
+})
+
+// config/test.env.js
+module.exports = merge(devEnv, {
+  NODE_ENV: '"testing"'
+})
+```
+
+> 주의: string 변수는 `'"..."'`로 사용해야합니다.
+
+위의 설정은 다음과 같이 해석됩니다.
+
+- Production
+  - NODE_ENV = 'production',
+  - DEBUG_MODE = false,
+  - API_KEY = '...'
+- Development
+  - NODE_ENV = 'development',
+  - DEBUG_MODE = true,
+  - API_KEY = '...'
+- Testing
+  - NODE_ENV = 'testing',
+  - DEBUG_MODE = true,
+  - API_KEY = '...'
+
+즉, `test.env`는 `dev.env`를 상속받으며, `dev.env`는 `prod.env`를 상속 받습니다.
+
+코드에서 다음과 같이 환경 변수를 사용할 수 있습니다.
+
+```javascript
+Vue.config.productionTip = process.env.NODE_ENV === 'production'
+```
+
+### Backend 프레임워크와 통합하기
 
 ### 참고
 
