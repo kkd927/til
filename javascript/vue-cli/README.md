@@ -104,13 +104,47 @@ bash$ vue init webpack vue-test
 
 이 파일은 빌드 단계에 대한 대부분의 설정들을 포함하고 있는 메인 설정 파일입니다.
 
+더 자세한 내용은 [API Proxying During Development](https://vuejs-templates.github.io/webpack/proxy.html)와 [Integrating with Backend Framework](https://vuejs-templates.github.io/webpack/backend.html)를 참고하세요.
+
 - `src/`
+
+여러분의 어플리케이션 소스 코드가 들어갈 디렉터리입니다. 이 디렉터리 하위의 구조를 어떻게 설계할지는 여러분 마음입니다. Vuex를 사용하려면 [Vuex 어플리케이션을 위한 권고사항](https://vuex.vuejs.org/en/structure.html)을 참고하세요.
 
 - `static/`
 
+이 디렉터리는 Webpack에 의해 처리될 필요가 없는 정적 파일들을 두는 곳입니다. 이 파일들은 웹펙이 파일들을 빌드할 때 같은 디렉터리로 단순히 복사만 됩니다.
+
+더 자세한 내용은 [Handling Static Assets](https://vuejs-templates.github.io/webpack/static.html)를 참고하세요.
+
+- `test/unit`
+
+유닛 테스트 파일들이 위치하는 디렉터리입니다. 자세한 내용은 [Unit Testing](https://vuejs-templates.github.io/webpack/unit.html)을 참고하세요.
+
+- `test/e2e`
+
+e2e 테스트 파일들이 위치하는 디렉터리입니다. 자세한 내용은 [End-to-end Testing](https://vuejs-templates.github.io/webpack/e2e.html)을 참고하세요.
+
 - `index.html`
 
+SPA(Single Page Application)을 위한 `index.html` 템플릿입니다. 개발과 빌드를 진행할 때, 웹팩이 어플리케이션에 필요한 파일들을 생성하고 해당 파일들에 대한 URL들을 자동으로 이 템플릿 파일에 주입하여 최종 HTML 파일을 생성합니다.
+
 - `package.json`
+
+빌드 디펜던시와 [빌드 명령어](./#빌드-명렁어)들이 포함되는 NPM 패키지 메타 파일입니다.
+
+### 빌드 명령어
+
+빌드 명령어는 [NPM Scripts](https://docs.npmjs.com/misc/scripts)를 통해 실행됩니다.
+
+- `npm run dev`
+
+- `npm run build`
+
+- `npm run unit`
+
+- `npm run e2e`
+
+- `npm run lint`
 
 ### 참고
 
