@@ -1,6 +1,6 @@
-## [vue-cli] Webpack 템플릿으로 vue.js 개발환경 구축하기
+# [vue-cli] Webpack 템플릿으로 vue.js 개발환경 구축하기
 
-### Introduction
+## Introduction
 
 이 환경 설정은 대형 프로젝트에 적합하며, Webpack 과 `vue-loader`에 대한 사전지식이 있다고 가정하에 진행됩니다. 시작하기 전에 [vue-loader 문서](https://vue-loader.vuejs.org/kr/start/spec.html)를 먼저 읽어보는 것을 추천합니다.
 
@@ -14,7 +14,7 @@ Vue 프로젝트 템플릿은 빠르게 어플리케이션 코드를 작성할 �
 - [browserify-simple](https://github.com/vuejs-templates/browserify-simple) 단순히 Browserify와 vueify만 포함합니다. 빠르게 프로토타입을 만들 때 사용합니다.
 - [simple](https://github.com/vuejs-templates/simple) - 가장 단순하게 한 HTML 파일에 Vue 설정을 담고 있습니다.
 
-### Quickstart
+## Quickstart
 
 [vue-cli](https://github.com/vuejs/vue-cli)를 이용하여 스캐폴딩을 진행할 것 입니다. 안정적인 디펜던시를 위해서 npm 3+를 사용하는 것을 추천합니다.
 
@@ -55,7 +55,7 @@ bash$ vue init webpack vue-test
 
 `npm run dev` 까지 실행하였다면 기본 준비는 모두 끝납니다. 커맨드 화면에 `Your application is running here: http://localhost:8080`가 출력되는 것을 확인하실 수 있습니다. 브라우저에서 `http://localhost:8080`에 접속하면 자동으로 구성된 화면이 뜨는 것을 볼 수 있습니다. 이제부터 추가설명을 진행할 것입니다.
 
-### 프로젝트 구조
+## 프로젝트 구조
 
 ```
 .
@@ -161,7 +161,7 @@ Nightwatch를 이용하여 end-to-end 테스트 실행. 자세한 내용은 [End
 
 eslint를 실행하여 코드의 린트 에러를 보여줍니다. 자세한 내용은 [Linter Configuration](https://vuejs-templates.github.io/webpack/linter.html)를 참고하세요.
 
-### 정적 자원 처리
+## 정적 자원 처리
 
 프로젝트 구조를 보면 정적 자원들을 위한 `src/assets`와 `static/` 2개의 디렉터리가 잇는 것을 확인할 수 있습니다. 이 둘의 차의점은 웹펙에 의해 처리되느냐 안되느냐의 차이점입니다.
 
@@ -192,7 +192,7 @@ module.exports = {
 
 자세한 내용은 [Integrating with Backend Framework](https://vuejs-templates.github.io/webpack/backend.html)를 참고하세요.
 
-### 환경 변수
+## 환경 변수
 
 보통 test, development, production 환경에 따라 다른 구성이 필요할 때가 많습니다. 자바 개발자라면 maven profile와 같다고 생각하시면 됩니다.
 
@@ -243,9 +243,9 @@ module.exports = merge(devEnv, {
 Vue.config.productionTip = process.env.NODE_ENV === 'production'
 ```
 
-### Backend 프레임워크와 통합하기
+## Backend 프레임워크와 통합하기
 
-### 참고
+## 참고
 
 https://vuejs-templates.github.io/webpack/
 
