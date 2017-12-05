@@ -256,7 +256,7 @@ const path = require('path')
 
 module.exports = {
   dev: {
-    / Paths
+    // Paths
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
     proxyTable: {},
@@ -287,19 +287,43 @@ module.exports = {
 
 #### `build.index`
 
-> 로컬 파일시스템의 절대경로이어야만 합니다.
+> 로컬 파일시스템의 절대경로이어야 합니다.
+
+`index.html` (asset URL이 주입되는) 템플릿이 생성되는 위치를 지정합니다.
+
+만약 backend 프레임워크와 함께 사용중이라면, backend 앱의 view 파일들을 두는 디렉터리 안으로 수정해야 합니다. 예들들어, Rails의 경우 `app/views/layouts/application.html.erb`와 같이 변경해야되고, Laravel의 경우 `resources/views/index.blade.php`입니다.
 
 #### `build.assetsRoot`
 
+> 로컬 파일시스템의 절대경로이어야 합니다.
+
+앱의 모든 정적 자산들을 포함하는 최상위 디렉터리 경로입니다. 예를들어, Rails/Laravel의 경우 `public/`이 되어야 합니다.
+
 #### `build.assetsSubDirectory`
+
+`build.assetsRoot`의 하위에 위치하는 웹팩에 의해 처리되는 자원들의 경로입니다. 예를들어, `build.assetsRoot`를 `/path/to/dist`로 설정하고 `build.assetsSubDirectory`를 `static`으로 설정하면, 웹팩에 의해 처리되는 자원들은 `path/to/dist/static`에 위치하게 됩니다.
+
+이 디렉터리는 항상 빌드 되기전에 내용이 전부 비워지고 빌드에 의해 생성되는 자원들이 새로 들어가게 됩니다.
+
+`static/`에 위치하는 정적 자원들은 빌드 시 이 디렉터리로 복사 되어집니다. 그래서 만약 이 설정을 바꾼다면, `static/` 하위에 있는 정적 자원들에 접근하기 위한 모든 절대 경로들도 수정해줘야 합니다. 자세한 내용은 [정적 자원 처리](#정적-자원-처리)를 참고하세요.
 
 #### `build.assetsPublicPath`
 
+HTTP를 통해 `build.assetsRoot` 자원들에 접근할 수 있는 경로를 설정하는 옵션입니다. 대부분의 경우 `/`를 사용하면 됩니다. 만약 여러분이 사용하고 있는 backend 프레임워크가 정적 자원들의 접근하기 위해 별도의 경로 prefix를 가지는 경우에만 수정하세요.
+
 #### `build.productionSourceMap`
+
+배포용 빌드에 대한 소스 맵을 생성할지 여부입니다.
 
 #### `dev.port`
 
+개발용 서버의 포트를 지정합니다.
+
 #### `dev.proxyTable`
+
+개발용 서버를 위한 proxy 규칙들을 정의합니다. 자세한 내용은 [개발 환경에서의 API Proxy 설정](#개발-환경에서의-API-Proxy-설정)를 참고하세요.
+
+## 개발 환경에서의 API Proxy 설정
 
 ## 참고
 
