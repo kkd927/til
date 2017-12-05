@@ -325,6 +325,46 @@ HTTP를 통해 `build.assetsRoot` 자원들에 접근할 수 있는 경로를 �
 
 ## 개발 환경에서의 API Proxy 설정
 
+이미 backend가 구축되어 있는 상황에서 이 보일러플레이트(webpack 템플릿)를 통합할 때는 개발서버에서 backend API에 접근해야하는 경우가 일반적입니다. 이를 위해서는 개발서버가 실제 backend를 바라볼 수 있도록 proxy 설정을 진행해야 합니다. (보통 backend 개발용 서버를 별도로 구축하는 것이 일반적이기 때문에, node.js 개발 서버가 backend 개발 서버를 바라보도록 proxy 설정을 하면 됩니다.)
+
+proxy 룰을 설정하기 위해서는 `config/index.js`에 있는 `dev.proxyTable` 옵션을 수정해야 합니다. 개발서버는 [http-proxy-middleware](https://github.com/chimurai/http-proxy-middleware)를 이용하여 proxy를 처리하기 때문에 상세내용은 해당 문서를 참고할 필요가 있습니다. 간단한 예는 다음와 같습니다.
+
+```javascript
+// config/index.js
+module.exports = {
+  // ...
+  dev: {
+    proxyTable: {
+      // proxy all requests starting with /api to jsonplaceholder
+      '/api': {
+        target: 'http://jsonplaceholder.typicode.com',
+        changeOrigin: true,
+        pathRewrite: {
+          '^/api': ''
+        }
+      }
+    }
+  }
+}
+```
+
+위의 예제에서 `/api/posts/1`에 대한 요청은 `http://jsonplaceholder.typicode.com/posts/1`로 프록시 처리되게 됩니다.
+
+#### URL 매칭
+
+추가적으로 정적 url에 `/api/**`와 같은 glob 패턴을 사용할 수 있습니다. 자세한 내용은 [Context Matching](https://github.com/chimurai/http-proxy-middleware#context-matching)을 참고하세요. 추가적으로 프록시가 처리되어할 요청을 결정하기 위해 `filter` 옵션을 통해 custom 함수를 제공할 수 있습니다.
+
+```javascript
+proxyTable: {
+  '**': {
+    target: 'http://jsonplaceholder.typicode.com',
+    filter: function (pathname, req) {
+      return pathname.match('^/api') && req.method === 'GET'
+    }
+  }
+}
+```
+
 ## 참고
 
 https://vuejs-templates.github.io/webpack/
