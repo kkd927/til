@@ -104,7 +104,7 @@ bash$ vue init webpack vue-test
 
 이 파일은 빌드 단계에 대한 대부분의 설정들을 포함하고 있는 메인 설정 파일입니다.
 
-더 자세한 내용은 [API Proxying During Development](https://vuejs-templates.github.io/webpack/proxy.html)와 [Integrating with Backend Framework](https://vuejs-templates.github.io/webpack/backend.html)를 참고하세요.
+더 자세한 내용은 [개발 환경에서의 API Proxy 설정](#개발-환경에서의-API-Proxy-설정)와 [Backend 프레임워크와 통합하기](#Backend-프레임워크와-통합하기)를 참고하세요.
 
 #### `src/`
 
@@ -114,7 +114,7 @@ bash$ vue init webpack vue-test
 
 이 디렉터리는 Webpack에 의해 처리될 필요가 없는 정적 파일들을 두는 곳입니다. 이 파일들은 웹펙이 파일들을 빌드할 때 같은 디렉터리로 단순히 복사만 됩니다.
 
-더 자세한 내용은 [Handling Static Assets](https://vuejs-templates.github.io/webpack/static.html)를 참고하세요.
+더 자세한 내용은 [정적 자원 처리](#정적-자원-처리)를 참고하세요.
 
 #### `test/unit`
 
@@ -138,11 +138,11 @@ SPA(Single Page Application)을 위한 `index.html` 템플릿입니다. 개발�
 
 #### `npm run dev`
 
-Node.js 로컬 개발 서버를 실행시킵니다. 자세한 내용은 [API Proxying During Development](https://vuejs-templates.github.io/webpack/proxy.html)를 참고하세요.
+Node.js 로컬 개발 서버를 실행시킵니다. 자세한 내용은 [개발 환경에서의 API Proxy 설정](#개발-환경에서의-API-Proxy-설정)를 참고하세요.
 
 #### `npm run build`
 
-배포를 위한 빌드. 자세한 내용은 [Integrating with Backend Framework](https://vuejs-templates.github.io/webpack/backend.html)를 참고하세요.
+배포를 위한 빌드. 자세한 내용은 [Backend 프레임워크와 통합하기](#Backend-프레임워크와-통합하기)를 참고하세요.
 
 - UglifyJS v3를 이용한 Javascript 압축
 - html-minifier를 이용한 HTML 압축
@@ -190,7 +190,7 @@ module.exports = {
 
 위의 구성을 따르면 `static/`에 위치하는 파일들은 절대 경로인 `/static/[filename]`으로 접근할 수 있습니다. 만약 `assetsSubDirectory`를 assets으로 바꾼다면 `/assets/[filename]`으로 파일에 접근할 수 있습니다.
 
-자세한 내용은 [Integrating with Backend Framework](https://vuejs-templates.github.io/webpack/backend.html)를 참고하세요.
+자세한 내용은 [Backend 프레임워크와 통합하기](#Backend-프레임워크와-통합하기)를 참고하세요.
 
 ## 환경 변수
 
