@@ -159,3 +159,69 @@ POST`http://foo.org/bar?a=${a}&b=${b}
 
 ### Destructuring
 
+Destructuring는 배열과 객체에 패턴 매칭을 통한 데이터 바인딩을 제공합니다. Destructuring는 할당 실패에 유연하며, 실패 시 `undefined` 값이 자동할당 됩니다. 또한 `foo["bar"]`와 같이 객체의 속성 값도 자동으로 검색하여 바인딩해줍니다.
+
+```javascript
+// list matching
+var [a, , b] = [1,2,3];
+
+// object matching
+var { op: a, lhs: { op: b }, rhs: c }
+       = getASTNode()
+
+// object matching 단축 표기
+// binds `op`, `lhs` and `rhs` in scope
+var {op, lhs, rhs} = getASTNode()
+
+// parameter에서도 사용 가능
+function g({name: x}) {
+  console.log(x);
+}
+g({name: 5})
+
+// Fail-soft destructuring
+var [a] = [];
+a === undefined;
+
+// Fail-soft destructuring with defaults
+var [a = 1] = [];
+a === 1;
+```
+
+더 자세한 설명은 [MDN Destructuring assignment](https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment)를 참고하세요.
+
+### Default + Rest + Spread
+
+파라미터에 기본 값을 설정할 수 있습니다.
+
+```javascript
+function f(x, y=12) {
+  // y is 12 if not passed (or passed as undefined)
+  return x + y;
+}
+f(3) // 15
+```
+
+가변인자를 사용가능하며, 배열로 치환시켜 줍니다. Rest parameters는 `arguments` 보다 직관성을 제공합니다.
+
+```javascript
+function f(x, ...y) {
+  // y is an Array ["hello", true]
+  return x * y.length;
+}
+f(3, "hello", true) // 6
+```
+
+함수 호출 시 배열을 일련의 인자에 나누어 주입시켜 줍니다.
+
+```javascript
+function f(x, y, z) {
+  return x + y + z;
+}
+// Pass each elem of array as argument
+f(...[1,2,3]) // 6
+```
+
+더 자세한 설명은 [Default parameters](https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Functions/Default_parameters), [Rest parameters](https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Functions/rest_parameters), [Spread Operator](https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Operators/Spread_operator)를 참고하세요.
+
+### Let + Const
