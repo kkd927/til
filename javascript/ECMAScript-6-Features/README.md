@@ -225,3 +225,116 @@ f(...[1,2,3]) // 6
 더 자세한 설명은 [Default parameters](https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Functions/Default_parameters), [Rest parameters](https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Functions/rest_parameters), [Spread Operator](https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Operators/Spread_operator)를 참고하세요.
 
 ### Let + Const
+
+블록 유효 범위를 갖는 새로운 변수 선언 방법을 지원합니다. `let`은 `var`와 유사하게 동작합니다. `const`는 재할당 및 재선언이 불가능합니다.
+
+```javascript
+function f() {
+  {
+    let x;
+    {
+      // okay, block scoped name
+      const x = "sneaky";
+      // error, const
+      x = "foo";
+    }
+    // error, already declared in block
+    let x = "inner";
+  }
+}
+```
+
+`var`의 유효 범위는 전체 외부 함수까지이지만 `let`은 변수를 선언한 블록과 그 내부 블록들에서 유효합니다.
+
+```javascript
+function varTest() {
+    var x = 31;
+    if (true) {
+        var x = 71;  // same variable!
+        console.log(x);  // 71
+    }
+    console.log(x);  // 71
+}
+
+function letTest() {
+    let x = 31;
+    if (true) {
+        let x = 71;  // different variable
+        console.log(x);  // 71
+    }
+    console.log(x);  // 31
+}
+```
+
+```javascript
+function varTest() {
+    if (true) {
+        var x = 71;
+        console.log(x);  // 71
+    }
+    console.log(x);  // 71
+}
+
+function varTest() {
+    let x = 71;
+    if (true) {
+        console.log(x);  // 71
+    }
+    console.log(x);  // 71
+}
+
+function varTest() {
+    if (true) {
+        let x = 71;
+        console.log(x);  // 71
+    }
+    console.log(x);  // Uncaught ReferenceError: x is not defined
+}
+```
+
+더 자세한 설명은 [let statement](https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Statements/let), [const statement](https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Statements/const)를 참고하세요.
+
+### Iterators + For..Of
+
+Iterator 객체는 CLR의 IEnumerable 혹은 Java의 Iterable처럼 사용자 정의의 반복을 가능하게 해줍니다. `for..of` 반복문이 ES6에서 추가 되었으며 `for..in` 반복문과 달리 iterator 기반의 컬렉션 전용 반복문입니다. `for in` 반복문과의 차이점은 [for in vs for of](http://itstory.tk/entry/Javascript-for-in-vs-for-of-반복문)를 참고하세요.
+
+```javascript
+let fibonacci = {
+    [Symbol.iterator]() {
+        let pre = 0, cur = 1;
+
+        return {
+            next() {
+                [pre, cur] = [cur, pre + cur];
+                return { done: false, value: cur }
+            }
+        }
+    }
+}
+
+for (var n of fibonacci) {
+    // truncate the sequence at 1000
+    if (n > 1000)
+        break;
+    console.log(n); // 1, 2, 3, 5, 8, ...987
+}
+```
+
+Iteration은 아래의 duck-type 인터페이스를 기반으로 합니다. (설명을 위해 [TypeScript](http://www.typescriptlang.org/)의 타입 문법을 사용하였습니다)
+
+```javascript
+interface IteratorResult {
+    done: boolean;
+    value: any;
+}
+interface Iterator {
+    next(): IteratorResult;
+}
+interface Iterable {
+    [Symbol.iterator](): Iterator
+}
+```
+
+더 자세한 설명은 [MDN for...of](https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Statements/for...of)를 참고하세요.
+
+### Generators
