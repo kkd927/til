@@ -338,3 +338,149 @@ interface Iterable {
 더 자세한 설명은 [MDN for...of](https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Statements/for...of)를 참고하세요.
 
 ### Generators
+
+Generators는 `function*`와 `yield` 키워드를 이용하여 iterator 선언을 단순하게 작성할 수 있게 도와줍니다. `function*`로 선언한 함수는 Generator 객체를 반환합니다. Generators는 iterator의 하위 타입이며 `next`와 `throw` 메서드를 가지고 있습니다. 이 메서드들로 인해 `yield` 키워드로 반환된 값은 다시 generator에 주입거나 예외처리를 할 수 있게 되었습니다.
+
+참고: 해당 키워드는 비동기 프로그래밍의 'await' 같은 기능이 가능하게끔 기반이 되었습니다. ES7의 [`await` 제안서](https://tc39.github.io/ecma262/#sec-async-function-definitions)를 참고하세요.
+
+```javascript
+var fibonacci = {
+    [Symbol.iterator]: function*() {
+        var pre = 0, cur = 1;
+        for (;;) {
+            [pre, cur] = [cur, pre + cur];
+            yield cur;
+        }
+    }
+}
+
+for (var n of fibonacci) {
+    // truncate the sequence at 20
+    if (n > 20)
+        break;
+    console.log(n); // 1, 2, 3, 5, 8, 13
+}
+```
+
+```javascript
+function* gen(){
+  yield* ["a", "b", "c"];
+}
+
+var a = gen();
+
+a.next(); // { value: "a", done: false }
+a.next(); // { value: "b", done: false }
+a.next(); // { value: "c", done: false }
+a.next(); // { value: undefined, done: true }
+```
+
+generator 인터페이스는 다음과 같습니다. (설명을 위해 [TypeScript](http://www.typescriptlang.org/)의 타입 문법을 사용하였습니다)
+
+```javascript
+interface Generator extends Iterator {
+    next(value?: any): IteratorResult;
+    throw(exception: any);
+}
+```
+
+더 자세한 설명은 [MDN Iteration protocols](https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Iteration_protocols)를 참고하세요.
+
+### Unicode
+
+완전한 유니코드를 지원하기 위해 문자열에 새로운 유니코드 리터럴과 정규표현식에 `u` 모드가 추가되었습니다. 또한 21비트 형식까지 처리하기 위한 신규 API가 추가되었습니다. 이 추가된 기능은 JavaScript로 글로벌 앱을 만들 수 있도록 지원합니다.
+
+```javascript
+// same as ES5.1
+"𠮷".length == 2
+
+// new RegExp behaviour, opt-in ‘u’
+"𠮷".match(/./u)[0].length == 2
+
+// new form
+"\u{20BB7}" == "𠮷"  == "\uD842\uDFB7"
+
+// new String ops
+"𠮷".codePointAt(0) == 0x20BB7
+
+// for-of iterates code points
+for(var c of "𠮷") {
+    console.log(c); // 𠮷
+}
+```
+
+더 자세한 설명은 [MDN RegExp.prototype.unicode](https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/RegExp)를 참고하세요.
+
+### Modules
+
+언어 차원에서 컴포넌트 정의를 위한 모듈을 지원합니다. 유명한 JavaScript 모듈 로더들(AMD, CommonJS)의 패턴을 적용시켰습니다. 런타임 동작은 호스트에 정의된 기본 로더에 의해 정의됩니다. 묵시적 비동기 형태로 요구되는 모듈들이 정상적으로 로드되기 전까지 코드가 실행되지 않습니다.
+
+```javascript
+// lib/math.js
+export function sum(x, y) {
+    return x + y;
+}
+export var pi = 3.141593;
+```
+
+```javascript
+// app.js
+import * as math from "lib/math";
+console.log("2π = " + math.sum(math.pi, math.pi)); // 2π = 6.283186
+```
+
+```javascript
+// otherApp.js
+import {sum, pi} from "lib/math";
+console.log("2π = " + sum(pi, pi)); // 2π = 6.283186
+```
+
+`export default`와 `export *` 문법도 제공합니다.
+
+```javascript
+// lib/mathplusplus.js
+export * from "lib/math";
+export var e = 2.71828182846;
+export default function(x) {
+    return Math.log(x);
+}
+```
+
+```javascript
+// app.js
+import ln, {pi, e} from "lib/mathplusplus";
+console.log("2π = " + ln(e)*pi*2);
+```
+
+더 자세한 내용은 [import statement](https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Statements/import), [export statement](https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Statements/export)를 참고하세요.
+
+### Module Loaders
+
+Module Loaders는 다음을 지원합니다.
+
+- 동적 로딍(Dynamic loading)
+- 상태 격리(State isolation)
+- 전역 네임스페이스 격리(Global namespace isolation)
+- 컴파일 훅(Compilation hooks)
+- 중첩 가상화(Nested virtualization)
+
+기본으로 사용할 모듈 로더를 설정할 수 있으며, 로더를 새로 생성하여 격리되거나 제한된 맥락에서 코드를 로드할 수 있습니다.
+
+```javascript
+// 동적 로딩 – ‘System’ is default loader
+System.import('lib/math').then(function(m) {
+    console.log("2π = " + m.sum(m.pi, m.pi));
+});
+
+// 실행 샌드박스 생성 – new Loaders
+var loader = new Loader({
+    global: fixup(window) // replace ‘console.log’
+});
+loader.eval("console.log('hello world!');");
+
+// 모듈 캐시 직접 조작
+System.get('jquery');
+System.set('jquery', Module({$: $})); // WARNING: not yet finalized
+```
+
+### Map + Set + WeakMap + WeakSet
