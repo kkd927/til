@@ -484,3 +484,267 @@ System.set('jquery', Module({$: $})); // WARNING: not yet finalized
 ```
 
 ### Map + Set + WeakMap + WeakSet
+
+일반 알고리즘을 위한 효율적인 데이터 구조를 제공합니다. WeakMap과 WeakSet는 메모리 누수로 부터 자유롭게 해줍니다. 이들 내 저장된 객체에 다른 참조가 없는 경우, garbage collection 될 수 있습니다.
+
+```javascript
+// Sets
+var s = new Set();
+s.add("hello").add("goodbye").add("hello");
+s.size === 2;
+s.has("hello") === true;
+
+// Maps
+var m = new Map();
+m.set("hello", 42);
+m.set(s, 34);
+m.get(s) == 34;
+
+// Weak Maps
+var wm = new WeakMap();
+wm.set(s, { extra: 42 });
+wm.size // undefined (사용된 곳이 없기 때문)
+
+// Weak Sets
+var ws = new WeakSet();
+ws.add({ data: 42 });
+wm.size // undefined (사용된 곳이 없기 때문)
+```
+
+더 자세한 내용은 MDN [Map](https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/Map), [Set](https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/Set), [WeakMap](https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/WeakMap), [WeakSet](https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/WeakSet)를 참고하세요.
+
+### Proxies
+
+프록시(Proxy)를 사용하면 호스트 객체에 다양한 기능을 추가하여 객체를 생성할 수 있습니다. interception, 객체 추상화, 로깅/수집, 값 검증 등에 사용될 수 있습니다.
+
+```javascript
+// Proxying a normal object
+var target = {};
+var handler = {
+  get: function (receiver, name) {
+    return `Hello, ${name}!`;
+  }
+};
+
+var p = new Proxy(target, handler);
+p.world // 'Hello, world!';
+```
+
+```javascript
+// Proxying a function object
+var target = function () { return 'I am the target'; };
+var handler = {
+  apply: function (receiver, ...args) {
+    return 'I am the proxy';
+  }
+};
+
+var p = new Proxy(target, handler);
+p() // 'I am the proxy';
+```
+
+```javascript
+let validator = {
+    set: function(obj, prop, value) {
+        if (prop === 'age') {
+            if (!Number.isInteger(value)) {
+                throw new TypeError('The age is not an integer');
+            }
+            if (value > 200) {
+                throw new RangeError('The age seems invalid');
+            }
+        }
+
+        // The default behavior to store the value 
+        obj[prop] = value;
+    }
+};
+
+let person = new Proxy({}, validator);
+
+person.age = 100;
+console.log(person.age); // 100
+person.age = 'young'; // Throws an exception
+person.age = 300; // Throws an exception
+```
+
+proxy의 `handler`가 가질 수 있는 트랩(trap)들입니다.
+
+```javascript
+var handler =
+{
+  get:...,
+  set:...,
+  has:...,
+  deleteProperty:...,
+  apply:...,
+  construct:...,
+  getOwnPropertyDescriptor:...,
+  defineProperty:...,
+  getPrototypeOf:...,
+  setPrototypeOf:...,
+  enumerate:...,
+  ownKeys:...,
+  preventExtensions:...,
+  isExtensible:...
+}
+```
+
+더 자세한 내용은 MDN [Proxy](https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/Proxy)를 참고하세요.
+
+### Symbols
+
+심볼(Symbol)은 객체 상태의 접근 제어를 가능하게 합니다. Symbol은 새로운 원시 타입으로 이름 충돌의 위험 없이 속성(property)의 키(key)로 사용할 수 있습니다. 옵션 파라미터인 `description`는 디버깅 용도로 사용되며 식별 용도는 아닙니다. Symbol은 고유(unique)하며, `Object.getOwnPropertySymbols`와 같은 reflection 기능들로 접근할 수 있기 때문에 private 하진 않습니다(`for in`나 `Object.keys()`로는 접근 불가).
+
+```javascript
+var map = {};
+var a = Symbol('a');
+
+map[a] = 123;
+map["b"] = 456;
+
+console.log(map[a]); // 123
+console.log(map["b"]); // 456
+
+for (let key in map) {
+    console.log(key); // b
+}
+
+Object.keys(map); // ["b"]
+```
+
+더 자세한 내용은 [ES6 In Depth: 심볼 (Symbol)](http://hacks.mozilla.or.kr/2015/09/es6-in-depth-symbols/)를 참고하세요.
+
+### Subclassable Built-ins
+
+ES6에서 `Array`, `Date`, DOM `Element` 같이 내장 객체들은 상속이 가능합니다. 객체 생성 시 호출되는 `Ctor` 함수는 다음의 2단계를 가집니다.(둘다 가상적으로 실행)
+
+- 객체 할당을 위해 `Ctor[@@create]` 호출하여 
+- 새로운 인스턴스의 생성자를 호출해 초기화 진행
+
+아시다싶이 `@@create` 심볼은 `Symbol.create`를 통해 만들어졌습니다.
+
+```javascript
+// Pseudo-code of Array
+class Array {
+    constructor(...args) { /* ... */ }
+    static [Symbol.create]() {
+        // Install special [[DefineOwnProperty]]
+        // to magically update 'length'
+    }
+}
+
+// User code of Array subclass
+class MyArray extends Array {
+    constructor(...args) { super(...args); }
+}
+
+// Two-phase 'new':
+// 1) Call @@create to allocate object
+// 2) Invoke constructor on new instance
+var arr = new MyArray();
+arr[1] = 12;
+arr.length == 2
+```
+
+### Math + Number + String + Array + Object APIs
+
+core Math 라이브러리, Array 생성 helper, String helper, 복사를 위한 Object.assign 등 많은 라이브러리들이 추가되었습니다.
+
+```javascript
+Number.EPSILON
+Number.isInteger(Infinity) // false
+Number.isNaN("NaN") // false
+
+Math.acosh(3) // 1.762747174039086
+Math.hypot(3, 4) // 5
+Math.imul(Math.pow(2, 32) - 1, Math.pow(2, 32) - 2) // 2
+
+"abcde".includes("cd") // true
+"abc".repeat(3) // "abcabcabc"
+
+Array.from(document.querySelectorAll('*')) // Returns a real Array
+Array.of(1, 2, 3) // Similar to new Array(...), but without special one-arg behavior
+[0, 0, 0].fill(7, 1) // [0,7,7]
+[1, 2, 3].find(x => x == 3) // 3
+[1, 2, 3].findIndex(x => x == 2) // 1
+[1, 2, 3, 4, 5].copyWithin(3, 0) // [1, 2, 3, 1, 2]
+["a", "b", "c"].entries() // iterator [0, "a"], [1,"b"], [2,"c"]
+["a", "b", "c"].keys() // iterator 0, 1, 2
+["a", "b", "c"].values() // iterator "a", "b", "c"
+
+Object.assign(Point, { origin: new Point(0,0) })
+```
+
+더 자세한 내용은 [Number](https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/Number), [Math](https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/Math), [Array.from](https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/Array/from), [Array.of](https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/Array/of), [Array.prototype.copyWithin](https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/Array/copyWithin), [Object.assign](https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/Object/assign)를 참고하세요.
+
+### Binary and Octal 
+
+2진법 (`b`), 8진법 (`o`) numeric 리터럴 형식이 추가되었습니다.
+
+```javascript
+0b111110111 === 503 // true
+0o767 === 503 // true
+```
+
+### Promises
+
+Promise는 비동기 프로그래밍을 위한 라이브러리입니다. Promise는 미래에 생성되는 값을 나타내는 일급 객체입니다. Promise는 현존하는 많은 JavaScript 라이브러리에 사용되고 있습니다.
+
+```javascript
+function timeout(duration = 0) {
+    return new Promise((resolve, reject) => {
+        setTimeout(resolve, duration);
+    })
+}
+
+var p = timeout(1000).then(() => {
+    return timeout(2000);
+}).then(() => {
+    throw new Error("hmm");
+}).catch(err => {
+    return Promise.all([timeout(100), timeout(200)]);
+})
+```
+
+더 자세한 내용은 [MDN Promise](https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/Promise)를 참고하세요.
+
+### Reflect API
+
+Reflection API는 런타임 시 객체에 대해 작업을 수행할 수 있습니다. 프록시 트랩(proxy traps)와 같은 메타 함수들을 가지고 있습니다. Reflection은 프록시를 구현하는데 유용합니다.
+
+```javascript
+class Greeting {
+    constructor(name) {
+        this.name = name;
+    }
+
+    greet() {
+      return `Hello ${name}`;
+    }
+}
+
+function greetingFactory(name) {
+    return Reflect.construct(Greeting, [name], Greeting);
+}
+
+greetingFactory('a'); // Greeting {name: "a"}
+```
+
+더 자세한 내용은 [MDN Reflect](https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/Reflect)를 참고하세요.
+
+### Tail Calls
+
+마지막에 호출되는 함수가 호출 스택이 초과되게 하지 않습니다. 재귀 알고리즘을 매우 큰 입력 값에서도 안전하게 만듭니다.
+
+```javascript
+function factorial(n, acc = 1) {
+    'use strict';
+    if (n <= 1) return acc;
+    return factorial(n - 1, n * acc);
+}
+
+// 현재 대부분의 자바스크립트 엔진에서 스택 오버플로우가 일어나지만,
+// ES6에서는 입력 값이 커도 안전하다
+factorial(100000);
+```
