@@ -195,3 +195,102 @@ console.dir(myFunction.prototype.constructor); // myFunction 함수
 
 ## 함수의 다양한 형태
 
+자바스크립트 함수 표현식에서 함수 이름은 꼭 붙이지 않아도 되는 선택 사항이다. 이러한 익명 함수의 대표적인 용도가 바로 **콜백 함수** 이다.
+
+대표적인 콜백 함수의 사용의 예가 자바스크립트에서의 이벤트 핸들러 처리이다.
+
+```html
+<!DOCTYPE html>
+<html>
+<body>
+    <script>
+        // 페이지 로드 시 호출될 콜백 함수
+        window.onload = function() {
+            alert('This is the callback function.');
+        };
+    </script>
+</body>
+</html>
+```
+
+함수를 정의함과 동시에 바로 실행하는 함수를 **즉시 실행 함수(immediate functions)** 라고 한다. 최초 한 번의 실행만을 필요로 하는 초기화 코드 부분 등에 사용할 수 있다.
+
+```javascript
+(function (name) {
+    console.log('This is the immediate function --> ' + name);
+    // This is the immediate function --> foo
+})('foo');
+```
+
+jQuery와 같은 자바스크립트 라이브러리에 종종 익명함수가 사용되는 것을 볼 수 있다.
+
+```javascript
+(function( window, undefined) {
+    // ...
+})( window );
+```
+
+기본적으로 자바스크립트는 변수를 선언할 경우 프로그램 전체에서 접근할 수 있는 전역 유효 범위를 가지게 된다. 그러나 함수 내부에서 정의된 매개변수와 변수(var로 선언된)들은 함수 코드 내부에서만 유효할 뿐 함수 밖에서는 유효하지 않다.
+
+따라서 라이브러리 코드를 이렇게 즉시 실행 함수 내부에 정의해두게 되면, 라이브러리 내의 변수들은 함수 외부에서 접근할 수 없다. **전역 네임스페이스를 더럽히지 않으므로, 다른 자바스크립트 라이브러리들이 동시에 로드가 되더라도 라이브러리 간 변수 이름 충돌 같은 문제를 방지할 수 있다.**
+
+자바스크립트에서는 함수 코드 내부에서도 다시 함수 정의가 가능하다. 이렇게 함수 내부에 정의된 함수를 **내부 함수(inner function)** 라고 부른다. 내부 함수는 자바스크립트의 기능을 보다 강력하게 해주는 클로저를 생성하거나 부모 함수 코드에서 외부에서의 접근을 막고 독립적인 헬퍼 함수를 구현하는 용도 등으로 사용한다.
+
+```javascript
+// parent 함수 정의
+function parent() {
+    var a = 100;
+    var b = 200;
+
+    // child 내부 함수 정의
+    function child() {
+        var b = 300;
+
+        console.log(a);
+        console.log(b);
+    }
+
+    child();
+}
+
+parent();   // 100 300
+child();    // Uncaught ReferenceError: child is not defined
+```
+
+이것이 가능한 이유는 자바스크립트의 **스코프 체이닝** 때문이다.
+
+부모 함수에서 내부 함수를 외부로 리턴하면, 부모 함수 밖에서도 내부 함수를 호출하는 것이 가능하다.
+
+```javascript
+function parent() {
+    var a = 100;
+
+    // child 내부 함수
+    var child = function() {
+        console.log(a);
+    }
+
+    // child 함수 반환
+    return child;
+}
+
+var inner = parent();
+inner(); // 100
+```
+
+이와 같이 실행이 끝난 parent()와 같은 부모 함수 스코프의 변수를 참조하는 inner()와 같은 함수를 **클로저** 라고 한다.
+
+자바스크립트에서는 함수도 일급 객체이므로 일반 값처럼 함수 자체를 리턴할 수도 있다.
+
+```javascript
+var self = function() {
+    console.log('a');
+
+    return function() {
+        console.log('b');
+    }
+}
+
+self = self(); // a
+self(); // b
+```
