@@ -147,6 +147,8 @@ function removeButton() {
 
 ### 4. 클로저(Closures)
 
+자바스크립트 개발에서 주요 요소 중 하나는 상위 스코프의 변수에 접근가능한 클로저입니다. Meteor 개발자들은 자바스크립트 런타임의 구현 방법으로 인해 메모리 누수가 가능한 [특정한 사례를 발견](https://blog.meteor.com/an-interesting-kind-of-javascript-memory-leak-8b47d2e7f156)했습니다.
+
 ```javascript
 var theThing = null;
 var replaceThing = function () {
@@ -158,12 +160,47 @@ var replaceThing = function () {
   theThing = {
     longStr: new Array(1000000).join('*'),
     someMethod: function () {
-      console.log(someMessage);
+      console.log('someMessage');
     }
   };
+  // 만약 여기에 `originalThing = null` 를 추가한다면, 메모리 누수는 사라질 것 입니다.
 };
 setInterval(replaceThing, 1000);
 ```
 
+위 코드에서 `replaceThing` 이 호출될 때마다 큰 사이즈의 배열과 `someMethod` 클로저를 생성합니다. 동시에 `unused` 변수는 `originalThing` 를 참조하는 클로저를 가지게 됩니다(`originalThing`는 `replaceThing` 선언 위에 있는 `theThing`을 참조). 벌써 헷갈리기 시작하시죠? 중요한 것은 클로저가 생성되면 해당 부모 스코프에 더 상위의 스코프에 대한 참조가 있는 경우 참조고리가 함께 공유됩니다. 즉, 비록 `unused` 가 절대 사용되지 않더라도 `usused` -> `orginThing` -> `theThing` 참조 고리에 의해  이 코드가 반복적으로 실행될 때 마다 메모리 사용량이 꾸준히 증가하는 것을 관찰할 수 있습니다. GC가 실행되더라도 메모리 사용량이 줄어들지 않게 됩니다. 본질적으로 클로저의 참조고리가 생성되고(`theThing` 변수를 루트로), 이 클로저의 범위에는 큰 사이즈의 배열에 대한 간접적인 참조를 동반하기 때문에 상당한 양의 메모리 누수가 발생하게 됩니다.
 
 ## Garbage Collectors의 비직관적인 동작
+
+Garbage Collectors는 편리하지만 그 들만의 특정 메커니즘에 의해 동작됩니다. 그 특징 중 하나는 비결정성(nondeterminism)입니다. 이 말은 GC는 예측이 불가능하단 뜻입니다. 언제 수집이 수행되는지 정확하게 예측할 수 없습니다. 즉, 경우에 따라서 프로그램에 요구되는 메모리보다 더 많은 메모리가 사용되고 있을 수 있습니다. 또 다른 경우, 민감함 어플리케이션에서는 짧은 일시정지 현상이 보이기도 합니다. 비록 비결정성은 수집이 언제 수행될지 모른다는 것을 의미하지만, 대부분의 GC는 일반적으로 메모리 할당이 이뤄지는 경우에만 수집을 수행합니다. 만약 메모리 할당이 이뤄지지 않았으면 대부분의 GC는 유휴상태에 있게 됩니다. 아래와 같은 시나리오를 살펴봅시다.
+
+1. 사이즈가 큰 데이터 할당을 여러번 수행합니다.
+2. Garbage Collector에 의해 대부분(혹은 전부)은 더 이상 접근되지 않는다라고 표시가 됩니다.(더 이상 사용하지 않은 경우 null로 초기화 했다고 가정)
+3. 더 이상의 할당을 수행하지 않습니다.
+
+이 시나리오에서 대부분의 GC들은 더 이상 수집을 수행하지 않습니다. 즉, 더 이상 접근되지 않는 데이터 셋들이 남아있음에도 불구하고 수집이 일어나지 않습니다. 이는 엄격히 메모리 누수는 아니지만, 일반적인 메모리 사용량보다 더 많은 메모리를 사용하게 됩니다.
+
+구글은 이 동작에 대한 훌륭한 예제를 [JavaScript Memory Profiling docs, example #2](https://developer.chrome.com/devtools/docs/demos/memory/example2)에서 제공합니다.
+
+## Chrome Memory Profiling Tools Overview
+
+크롬은 자바스크립트 코드의 메모리 사용을 프로파일링할 수 있는 좋은 도구들을 제공합니다. 메모리에 관련 도구로 Performance 메뉴와 Memory메뉴가 있습니다.
+
+### Performance 메뉴 (구 Timeline)
+
+Performance 메뉴는 코드에서 비정상 메모리 사용 패턴을 발견하는데 필수적입니다. 이 스크린샷에서 메모리 누수가 계속 커지는 것을 볼 수 있습니다. Major GC가 수행 후에도 메모리 사용량이 줄어들지 않습니다. 노드의 수도 점차 증가하고 있습니다. 이것들으 종합해보면 코드 어딘가에 DOM 노드의 누수임을 짐작할 수 있습니다.
+
+### Memory 메뉴 (구 Profiles)
+
+앞으로 자주 봐야할 메뉴입니다. Memory 메뉴에서 스냅샷들을 찍을 수 있고 자바스크립트 코드의 메모리 사용을 비교해볼 수 있습니다. 또한 시간에 따라 메모리 할당을 기록할 수 있습니다. summary 와 comparison 목록을 주로 살펴보시면 됩니다.
+
+## 크롬 개발자 도구를 이용한 메모리 누수 찾기 예제
+
+### Find out if memory is periodically increasing
+
+### Get two snapshots
+
+### Recording heap allocations to find leaks
+
+
+### Another useful feature
