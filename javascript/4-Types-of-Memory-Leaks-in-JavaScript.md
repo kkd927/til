@@ -188,9 +188,13 @@ Garbage Collectors는 편리하지만 그 들만의 특정 메커니즘에 의�
 
 ### Performance 메뉴 (구 Timeline)
 
+![사진](http://img1.daumcdn.net/thumb/R1920x0/?fname=http%3A%2F%2Fcfile4.uf.tistory.com%2Fimage%2F9987E04C5A559AE62F0DB4)
+
 Performance 메뉴는 코드에서 비정상 메모리 사용 패턴을 발견하는데 필수적입니다. 이 스크린샷에서 메모리 누수가 계속 커지는 것을 볼 수 있습니다. Major GC가 수행 후에도 메모리 사용량이 줄어들지 않습니다. 노드의 수도 점차 증가하고 있습니다. 이것들으 종합해보면 코드 어딘가에 DOM 노드의 누수임을 짐작할 수 있습니다.
 
 ### Memory 메뉴 (구 Profiles)
+
+![사진](http://img1.daumcdn.net/thumb/R1920x0/?fname=http%3A%2F%2Fcfile28.uf.tistory.com%2Fimage%2F99B385495A559B1C2A9D8F)
 
 앞으로 자주 봐야할 메뉴입니다. Memory 메뉴에서 스냅샷들을 찍을 수 있고 자바스크립트 코드의 메모리 사용을 비교해볼 수 있습니다. 또한 시간에 따라 메모리 할당을 기록할 수 있습니다. summary 와 comparison 목록을 주로 살펴보시면 됩니다.
 
@@ -227,6 +231,8 @@ function grow() {
 
 Performance 메뉴(구 Timeline)를 통해 쉽게 탐지할 수 있습니다. [Chrome에서 제공해주는 예제 페이지](https://developer.chrome.com/devtools/docs/demos/memory/example1)에 들어가서 개발자 도구를 열고 Performance 메뉴에 들어갑니다. 그리고 memory 체크박스에 체크를 한 후 record 버튼을 누릅니다. 그 후, 예제 페이지의 `The Button` 버튼을 눌려 메모리 누수를 시작시켜 봅니다. 잠시 후 record를 정지시킨 후 결과를 살펴봅시다.
 
+![사진](http://img1.daumcdn.net/thumb/R1920x0/?fname=http%3A%2F%2Fcfile10.uf.tistory.com%2Fimage%2F99B5624A5A559B5814B755)
+
 이 사진에서 메모리 누수가 있다는 것을 보여주는 큰 징후가 두 개 있습니다. *nodes(초록선)* 와 *JS heap(파란선)* 그래프입니다. 노드들이 꾸준이 증가하며 감소되지 않습니다. 이것이 가장 큰 징후입니다.
 
 JS heap 그래프도 역시 메모리 사용이 계속 증가되고 있음을 보여줍니다. 하지만 garbage collector의 영향으로 알아채기가 쉽지는 않습니다. 초기에 메모리가 증가하다가 한 번 크게 감소하고 더 증가하다가 또 감소하는 형태가 반복됨을 확인할 수 있습니다. 이 경우 핵심은, GC에 의해 메모리 사용량이 감소할 때마다 힙의 크기가 이전보다 더 크게 유지된다는 점입니다. 다시 말해서 GC가 많은 양의 메모리를 수집하는 데 성공하고 있지만, 그 중 일부가 주기적으로 누수되고 있다는 것입니다.
@@ -239,9 +245,13 @@ JS heap 그래프도 역시 메모리 사용이 계속 증가되고 있음을 �
 
 페이지를 새로고침하고 페이지 로딩이 끝나면 heap 스냅샷을 생성합니다. 이 스냅샷을 기준으로 사용하겠습니다. 그런 다음 다시 `The Button` 을 누르고 몇 초간 기다린 후에 두번째 스냅샷을 생성합시다. 스냅샷을 생성했다면 코드에 중단점을 설정하여 더 이상 누수가 되지 않게 하는 것이 좋습니다.
 
+![사진](http://img1.daumcdn.net/thumb/R1920x0/?fname=http%3A%2F%2Fcfile10.uf.tistory.com%2Fimage%2F998DF3445A559B8824C84F)
+
 두 스냅샷의 메모리 할당을 비교할 수 있는 두가지 방법이 있습니다. *Summary* 를 선택한 다음, 우측에 있는 `All objects` 를 `Objects allocated between Snapshot1 and Snapshot 2` 를 선택하거나 `Summary` 대신 `Comparison` 을 선택하면 됩니다. 두 방법 모두 두 스냅샷의 할당된 객체 목록이 표시됩니다.
 
 이 예제에서 메모리 누수가 크기 때문에 매우 쉽게 발견됩니다. `(string)` Constructor의 `Size Delta` 표를 확인 해봅시다. 58개의 객체 생성으로 8MB를 차지하고 있습니다. 의심스로운 결과입니다. 새로운 객체들이 할당되었지만 해제되지 않아 8MB의 메모리가 소비되었습니다. `(string)` Constuctor 표를 열어보면 사이즈가 매우 큰 할당이 몇 개 있는 것을 확인하실 수 있습니다. 이 중 하나(xxxxxxxx... 로 표시된)를 선택하여 하단의 `Retainers` 표를 살펴보면 흥미로운 점을 찾을 수 있습니다.
+
+![사진](http://img1.daumcdn.net/thumb/R1920x0/?fname=http%3A%2F%2Fcfile22.uf.tistory.com%2Fimage%2F99316C495A559BBC0D4650)
 
 선택한 할당이 배열의 일부임을 확인할 수 있습니다. 이 배열은 전역 `window` 객체의 `x` 변수로 참조되어 있다고 나옵니다. 이는 수집되지 않는 루트 (window) 객체에 큰 사이즈의 객체가 참조되어 있음을 우리에게 알려줍니다. 이제 잠재적인 메모리 누수와 그 위치를 발견했습니다.
 
@@ -251,15 +261,21 @@ JS heap 그래프도 역시 메모리 사용이 계속 증가되고 있음을 �
 
 이전에 설정한 중단점을 제거하여 예제 페이지의 스크립트가 계속 실행되도록 한 다음 크롬 개발자 도구의 Memory 메뉴(구 Profiles)로 돌아가봅시다. 그리고 *Record allocation timeline* 을 체크한 후 스냅샷을 찍어봅시다. 기록이 진행되는 동안 상단에 파랑색의 기둥 모양의 그래프가 생기는 것을 볼 수 있을 것입니다. 이것은 메모리 할당을 나타냅니다. 매초마다 큰 할당이 이뤄지는 것을 보실 수 있을 것입니다. 몇초동안 기록을 진행한 다음 중지합니다(중지 후 예제 코드가 메모리를 계속 잡아 먹지 않게 중단점 설정하는 것을 잊지맙시다).
 
+![사진](http://img1.daumcdn.net/thumb/R1920x0/?fname=http%3A%2F%2Fcfile4.uf.tistory.com%2Fimage%2F99BE88495A559BEC2AD025)
+
 위 사진에서 볼 수 있듯이 차트 타임라인의 일부를 선택하면 해당 기간 동안에 수행되는 할당만 볼 수 있습니다. 위 사진에서는 큰 할당이 있는 부분에 근접하게 설정했습니다. 목록에는 3개의 constructor만 표시되어 있습니다. 이 중 하나는 메모리 누수를 일으키는 `(string)` 항목이고, 다른 하나는 DOM 할당에 관련된 항목, 나머지 하나는 `Text` constructor 항목(DOM 말단 노드에 존재하는 text 요소)입니다.
 
 `HTMLDivElement` constructor 항목 중 하나를 선택하고 하단의 `Allocation stack` 메뉴를 눌러봅시다(메뉴가 안보이면 우측 상단의 옵션에 들어가 `Settings > Record heap allocation stack traces` 를 체크하면 됩니다).
+
+![사진](http://img1.daumcdn.net/thumb/R1920x0/?fname=http%3A%2F%2Fcfile22.uf.tistory.com%2Fimage%2F99FB8E485A559C410B56D0)
 
 이제, `grow` -> `createSomeNodes` 로 참조되어 할당된 요소를 보실 수 있습니다. 각 기둥 모양의 그래프에 초점을 맞춰 살펴보면 `HTMLDivElement` 생성자가 많이 호출되는 것을 볼 수 있습니다. 전에 살펴보았던 두 스냅샷을 비교하는 메뉴로 돌아가보면 이 `HTMLDivElement` 생성자가 많은 할당은 하지만 삭제가 없는 것을 볼 수 있습니다. 즉, GC에서 메모리를 회수하지 않고 지속적으로 할당만 이뤄지고 있는 것입니다. 이는 메모리 누수의 징후를 보여주며, 우리는 이 객체가 어디에 할당되는지 이제 알게 되었습니다(`createSomeNodes` 함수). 이제 다시 코드로 돌아가서, 메모리 누수를 야기하는 코드를 고치면 끝입니다.
 
 ### 또 다른 유용한 기능
 
 위에서 살펴본 *allocation timeline* 메뉴에서 `Summary` 외에도 `Allocation` 를 선택할 수 있습니다.
+
+![사진](http://img1.daumcdn.net/thumb/R1920x0/?fname=http%3A%2F%2Fcfile8.uf.tistory.com%2Fimage%2F996912505A559C6012D37B)
 
 이 메뉴는 함수 목록들과 해당 함수와 관련된 메모리 할당들을 보여줍니다. 화면에서 `grow` 와 `createSomeNodes` 함수가 있는 것을 바로 볼 수 있을 것입니다. 해당 함수들을 클릭하면 해당 함수와 관련된 객체 constructor 목록들을 하단에서 볼 수 있습니다. 위에서 이미 메모리 누수임을 밝혀낸 `(string)`, `HTMLDivElement`, `Text` 생성자들도 있음을 확인할 수 있습니다.
 
