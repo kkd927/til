@@ -267,3 +267,215 @@ self(); // b
 ```
 
 ## 함수 호출과 this
+
+**arguments 객체**
+
+C와 같은 엄격한 언어와 달리, 자바스크립트에서는 함수를 호출할 때 함수 형식에 맞춰 인자를 넘기지 않더라도 에러가 발생하지 않는다. 정의된 함수의 인자보다 적게 함수를 호출했을 경우, 넘겨지지 않은 인자에는 **undefined** 값이 할당된다. 이와 반대로 정의된 인자 개수보다 많게 호출했을 경우 초과된 인수는 무시된다.
+
+이러한 특성 때문에, 런타임 시에 호출된 인자의 개수를 확인하고 이에 따라 동작을 다르게 해줘야 할 경우가 있다. 이를 가능케 하는게 함수를 호출할 때 암묵적으로 전달되는 arguments 객체다. 이 객체는 실제 배열이 아닌 유사 배열 객체이다.
+
+```javascript
+function add(a, b) {
+    console.dir(arguments);
+    return a + b;
+}
+
+console.log(add(1)); // NaN
+console.log(add(1, 2)); // 3
+console.log(add(1, 2, 3)); // 3
+```
+
+**호출 패턴과 this 바인딩**
+
+자바스크립트에서 함수를 호출할 때 기존 매개변수로 전달되는 인자값에 더해, 앞서 설명한 arguments 객체 및 **this 인자가 함수 내부로 암묵적으로 전달된다.** this가 이해하기가 어려운 이유는 자바스크립트의 여러 가지 함수가 호출되는 방식(호출 패턴)에 따라 this가 다른 객체를 참조하기(this 바인딩) 때문이다.
+
+**1. 객체의 메서드 호출할 때 this 바인딩**
+
+객체의 프로퍼티가 함수일 경우, 이 함수를 메서드라고 부른다. 메서드 내부 코드에서 사용된 this는 **해당 메서드를 호출한 객체로 바인딩 된다.**
+
+```javascript
+var myObject = {
+    name: 'foo',
+    sayName: function () {
+        console.log(this.name);
+    }
+}
+
+var otherObject = {
+    name: 'bar'
+}
+
+otherObject.sayName = myObject.sayName;
+
+myObject.sayName(); // foo
+otherObject.sayName(); // bar
+```
+
+**2. 함수를 호출할 때 this 바인딩**
+
+함수를 호출할 경우는, 해당 함수 내부 코드에서 사용된 **this는 전역 객체에 바인딩된다.** 브라우저에서 자바스크립트를 실행하는 경우 전역 객체는 window 객체다.
+
+```javascript
+var test = 'This is test';
+console.log(window.test); // 'This is test'
+
+var sayFoo = function() {
+    console.log(this.test); // 'This is test'
+}
+
+sayFoo();
+```
+
+이러한 함수 호출에서의 this 바인딩 특성은 **내부 함수(inner function)를 호출했을 경우에도 동일하게 적용되므로** 유의해서 사용해야 한다.
+
+```javascript
+// 전역 변수
+var value = 100;
+
+var myObject = {
+    value : 1,
+    func1 : function() {
+        this.value += 1;
+        console.log('func1() called. this.value : ' + this.value); // 2
+
+        // func1의 내부 함수 func2
+        func2 = function() {
+            this.value += 1;
+            console.log('func2() called. this.value : ' + this.value); // 101
+
+            // func2의 내부 함수 func3
+            func3 = function() {
+                this.value += 1;
+                console.log('func3() called. this.value : ' + this.value); // 102
+            }
+
+            func3();
+        }
+
+        func2();
+    }
+};
+
+myObject.func1();
+```
+
+자바스크립트에서 **내부 함수 호출 패턴을 정의해 놓지 않았기 때문에,** 함수로 취급되어 함수 호출 패턴 규칙에 따라 내부 함수의 this는 전역 객체에 바인딩된다. 그래서 흔히들 that 변수를 이용하여 this 값을 저장한다.
+
+```javascript
+var value = 100;
+
+var myObject = {
+    value : 1,
+    func1 : function() {
+        // 현 상태의 this를 that 변수에 저장
+        var that = this;
+
+        this.value += 1;
+        console.log('func1() called. this.value : ' + this.value); // 2
+
+        // func1의 내부 함수 func2
+        func2 = function() {
+            that.value += 1;
+            console.log('func2() called. this.value : ' + that.value); // 3
+
+            // func2의 내부 함수 func3
+            func3 = function() {
+                that.value += 1;
+                console.log('func3() called. this.value : ' + that.value); // 4
+            }
+
+            func3();
+        }
+
+        func2();
+    }
+};
+
+myObject.func1();
+```
+
+이와 같은 this 바인딩의 한계를 극복하려고, this 바인딩을 명시적으로 할 수 있도록 call과 apply 메서드를 제공한다.
+
+**3. 생성자 함수를 호출할 때 this 바인딩**
+
+자바스크립트에서 **기존 함수에 new 연산자를 붙여서 호출하면 해당 함수는 생성자 함수로 동작한다.** 일반 함수에 new를 붙여 호출하면 원치 않는 생성자 함수로 동작할 수 있기 때문에, 대부분의 자바스크립트 스타일 가이드에서는 특정 함수가 생성자 함수로 정의되어 있음을 알리려고 함수 이름의 첫 문자를 대문자로 쓰기를 권하고 있다.
+
+생성자 함수에서의 this는 **생성자 함수를 통해 새로 생성되어 반환되는 객체에 바인딩된다.** (이는 생성자 함수에서 명시적으로 다른 객체를 반환하지 않는 일반적인 경우에 적용됨)
+
+```javascript
+// Person 생성자 함수
+var Person = function(name) {
+    this.name = name;
+}
+
+// foo 객체 생성
+var foo = new Person('foo');
+console.log(foo.name); // foo
+```
+
+*객체 리터럴 방식과 생성자 함수를 통한 객체 생성 방식의 차이*
+
+객체 리터럴 방식으로 생성된 객체는 생성자 함수처럼 다른 인자를 넣어 형식은 같지만 다른 값을 가지는 객체를 생성할 수 없다.
+
+```javascript
+var foo = {
+    name : 'foo'
+}
+
+function Person(name) {
+    this.name = name;
+}
+
+var bar = new Person('bar');
+var baz = new Person('baz');
+```
+
+또 다른 차이점은 객체 리터럴 방식으로 생성한 foo 객체의 \_\_proto\_\_ 프로퍼티는 Object.prototype를 가르키며, 생성자 함수를 통해 생성한 bar, baz 객체의 \_\_proto\_\_ 프로퍼티는 Person.prototype를 가르킨다는 점이다.
+
+*생성자 함수를 new를 붙이지 않고 호출할 경우*
+
+생성자 함수를 new를 붙이지 않고 호출할 경우 위에서 살펴본 *2. 함수를 호출할 때 this 바인딩* 규칙이 적용되어 this가 전역객체에 바인딩된다. 이런 위험성을 피하려고 널리 사용되는 패턴이 있다.
+
+```javascript
+function A(arg) {
+    if (!(this instanceof A)) {
+        return new A(arg);
+    }
+
+    this.value = arg ? arg : 0;
+}
+```
+
+**4. call과 apply 메서드를 이용한 명시적인 this 바인딩**
+
+Function.prototype 객체의 메서드인 call()과 apply()를 통해 명시적으로 this를 바인딩 가능하다.
+
+```javascript
+// Person 생성자 함수
+function Person(name) {
+    this.name = name;
+}
+
+// foo 빈 객체 생성
+var foo = {};
+
+Person.apply(foo, ['foo']);
+
+console.log(foo.name); // foo
+console.log(foo.__proto__ === Object.prototype) // true
+```
+
+예제에서 알 수 있듯이 apply()를 통해 호출한 경우, 생성자 함수 방식이 아닌 this 가 foo 객체에 바인딩되어 \_\_proto\_\_ 프로퍼티가 Person.prototype이 아닌 Object.prototype이다.
+
+이처럼 apply()나 call() 메서드는 this를 원하는 값으로 명시적으로 매핑해서 특정 함수나 메서드를 호출할 수 있다는 장점이 있다. 그리고 이들의 대표적인 용도가 arguments 객체와 같은 유사 배열 객체에서 배열 메서드를 사용하는 경우이다. arguments 객체는 실제 배열이 아니므로 pop(), shift() 같은 표준 메서드를 사용할 수 없지만 apply() 메서드를 이용하면 가능하다.
+
+```javascript
+function myFunction() {
+    // arguments.shift(); 에러 발생
+
+    var args = Array.prototype.slice.apply(arguments);
+}
+
+myFunction();
+```
+
