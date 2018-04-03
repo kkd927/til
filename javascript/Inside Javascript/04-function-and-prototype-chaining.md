@@ -479,3 +479,123 @@ function myFunction() {
 myFunction();
 ```
 
+## 프로토타입 체이닝
+
+자바스크립트는 기존 C++이나 자바 같은 객체지향 프로그래밍 언어와는 다른 프로토타입 기반의 객체지향 프로그래밍을 지원한다. 자바스크립트에서 객체는 자기 자신의 프로퍼티뿐만 아니라, 자신의 부모 역할을 하는 프로토타입 객체의 프로퍼티 또한 마치 자신의 것처럼 접근하는게 가능하다. 이것을 가능케 하는 게 바로 **프로토타입 체이닝** 이다. 이전 글에 정리한 함수, this만 이해하면 프로토타입 체이닝은 딱히 어려운 점은 없다.
+
+- [[JavaScript] 4. 함수와 프로토타입 체이닝 (1) - 함수란](http://itstory.tk/entry/4-함수와-프로토타입-체이닝-1?category=969082)
+- [[JavaScript] 4. 함수와 프로토타입 체이닝 (2) - this란](http://itstory.tk/entry/JavaScript-4-함수와-프로토타입-체이닝-2-this란?category=969082)
+
+**객체 리터럴 방식으로 생성된 객체의 프로토타입 체이닝**
+
+```javascript
+var myObject = {
+    name: 'foo',
+    sayName: function() {
+        console.log('My name is ' + this.name);
+    }
+}
+
+myObject.sayName(); // My name is foo
+console.log(myObject.hasOwnProperty('name')); // true
+console.log(myObject.hasOwnProperty('nickname')); // false
+```
+
+`myObject.hasOwnProperty()` 메서드는 어디서 난 것일까? 이 메서드는 인자로 넘긴 문자열 이름의 프로퍼티나 메서드가 있는지 체크하는 함수로 Object.prototype에 선언되어 있다.
+
+객체 생성에서 말했듯이 객체 리터럴로 생성한 객체는 Object() 라는 내장 생성자 함수로 생성된 것이다. 그러면 아래 그림처럼 myObject 객체의 \_\_proto\_\_ 프로퍼티는 Object.prototype 객체를 가르키게 된다.
+
+자바스크립트에서 특정 객체의 프로퍼티나 메서드에 접근하려고 할 때, 해당 객체에 접근하려는 프로퍼티 또는 메서드가 없다면 \_\_proto\_\_ 링크를 다라 자신의 부모 역할을 하는 프로토 타입 객체의 프로퍼티를 차례대로 검색하며, 이를 프로토타입 체이닝이라고 한다.
+
+**생성자 함수로 생성된 객체의 프로토타입 체이닝**
+
+생성자 함수로 객체를 생성하는 경우도 다를 바가 없다.
+
+```javascript
+function Person(name, age) {
+    this.name = name;
+    this.age = age;
+}
+
+Person.prototype.setName = function(name) {
+	this.name = name;
+}
+
+var foo = new Person('foo', 28);
+
+console.log(foo.name); // foo
+
+foo.setName('bar');
+
+console.log(foo.name); // bar
+
+console.log(foo.hasOwnProperty('name')); // true
+console.log(foo.__proto__ === Person.prototype); // true
+```
+
+이전 [함수편](http://itstory.tk/entry/4-함수와-프로토타입-체이닝-1?category=969082)에서 살펴본 다이어그램에서 한 번더 확장만 하면된다.
+
+그림에서 볼 수 있듯이 foo 객체의 \_\_proto\_\_는 Person.prototype 객체를 가르킨다. 따라서 프로토타입 체이닝을 통해 foo 객체는 `Person.prototype.setName` 메서드를 사용할 수 있다.
+
+여기서 프로토타입 체이닝이 끝나는 것이 아니라 recursive 하게 계속 진행된다. 즉 Person.prototype 객체의 \_\_proto\_\_는 Object.prototype을 가리키므로 foo 객체는 Object.prototype 속성들도 사용할 수 있게 된다. 코드에서 foo.hasOwnProperty 가 가능한 이유다.
+
+
+**프로토타입 체이닝의 종점**
+
+자바스크립트에서 Object.prototype 객체는 프로토타입 체이닝의 종점이다. 앞서 살펴봤듯이 객체 리터럴 방식이나 생성자 함수를 이용한 방식이나 결국엔 Object.prototype에서 프로토타입 체이닝이 끝나는 것을 알 수 있다.
+
+자바스크립트의 숫자, 문자, 배열 등에서 사용되는 표준 메서드들의 경우, 이들의 프로토타입인 Number.prototype, String.prototype, Array.prototype 등에 정의되어있다. 물론 이러한 기본 내장 프로토타입 객체 또한 Object.prototype으로 연결된다.
+
+Object.prototype, String.prototype 등과 같이 표준 빌트인 프로토타입 객체에도 사용자가 직접 정의한 메서드들을 추가하는 것을 허용한다. String.prototype에 추가한 메서드는 일반 문자열 표준 메서드처럼, 모든 문자열에서 접근 가능하다.
+
+```javascript
+String.prototype.testMethod = function() {
+    console.log(this.toString() + ' Go Go!');
+}
+
+var str = 'This is test.';
+
+str.testMethod(); // This is test. Go Go!
+```
+
+**프로토타입 메서드와 this 바인딩**
+
+위에서 살펴본 예제 코드들에서 prototype 객체에 정의한 메서드 내부에 `this` 를 사용했다. 이전 글 [this편](http://itstory.tk/entry/JavaScript-4-함수와-프로토타입-체이닝-2-this란?category=969082)에서 설명한 this 바인딩 규칙이 그대로 적용된다. 결국, 메서드 호출 패턴에서의 this는 그 메서드를 호출한 객체에 바인딩된다는 것을 기억하자.
+
+```javascript
+function Person(name, age) {
+    this.name = name;
+    this.age = age;
+}
+
+Person.prototype.setName = function(name) {
+	this.name = name;
+}
+```
+
+**디폴트 프로토타입은 다른 객체로 변경이 가능하다**
+
+디폴트 프로토타입 객체는 함수가 생성될 때 같이 생성되며, 함수의 prototype 프로퍼티에 연결된다. 자바스크립트에서는 이렇게 함수를 생성할 때 해당 함수와 연결되는 **디폴트 프로토타입 객체를 다른 일반 객체로 변경하는 것이 가능하다.** 이러한 특징을 이용해서 객체지향의 상속을 구현한다.
+
+여기서 주의할 점은 생성자 함수의 프로토타입 객체가 변경되면 변경된 시점 이후헤 생성된 객체들은 변경된 프로토 타입 객체로 연결되고, 이전에 생성된 객체들은 기존 프로토타입 객체로의 연결을 그대로 유지한다.
+
+
+```javascript
+function Person(name) {
+    this.name = name;
+}
+
+var foo = new Person('foo');
+
+console.log(foo.country); // undefined
+
+Person.prototype = {
+    country: 'korea'
+};
+
+var bar = new Person('bar');
+
+console.log(foo.country); // undefined
+console.log(bar.country); // korea
+
+```
