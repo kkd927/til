@@ -505,6 +505,8 @@ console.log(myObject.hasOwnProperty('nickname')); // false
 
 객체 생성에서 말했듯이 객체 리터럴로 생성한 객체는 Object() 라는 내장 생성자 함수로 생성된 것이다. 그러면 아래 그림처럼 myObject 객체의 \_\_proto\_\_ 프로퍼티는 Object.prototype 객체를 가르키게 된다.
 
+![myObject](http://img1.daumcdn.net/thumb/R1920x0/?fname=http%3A%2F%2Fcfile28.uf.tistory.com%2Fimage%2F99112C475AC3049220A421)
+
 자바스크립트에서 특정 객체의 프로퍼티나 메서드에 접근하려고 할 때, 해당 객체에 접근하려는 프로퍼티 또는 메서드가 없다면 \_\_proto\_\_ 링크를 다라 자신의 부모 역할을 하는 프로토 타입 객체의 프로퍼티를 차례대로 검색하며, 이를 프로토타입 체이닝이라고 한다.
 
 **생성자 함수로 생성된 객체의 프로토타입 체이닝**
@@ -534,6 +536,8 @@ console.log(foo.__proto__ === Person.prototype); // true
 ```
 
 이전 [함수편](http://itstory.tk/entry/4-함수와-프로토타입-체이닝-1?category=969082)에서 살펴본 다이어그램에서 한 번더 확장만 하면된다.
+
+![foo](http://img1.daumcdn.net/thumb/R1920x0/?fname=http%3A%2F%2Fcfile1.uf.tistory.com%2Fimage%2F991CBE445AC304B13050DB)
 
 그림에서 볼 수 있듯이 foo 객체의 \_\_proto\_\_는 Person.prototype 객체를 가르킨다. 따라서 프로토타입 체이닝을 통해 foo 객체는 `Person.prototype.setName` 메서드를 사용할 수 있다.
 
