@@ -158,6 +158,8 @@ console.dir(myFunction.prototype.constructor); // myFunction 함수
 
 지금까지의 내용을 도식화하면 다음과 같다.
 
+![prototype](http://img1.daumcdn.net/thumb/R1920x0/?fname=http%3A%2F%2Fcfile24.uf.tistory.com%2Fimage%2F99579D415AA8E76E1243AF)
+
 ## 함수의 다양한 형태
 
 **1. 콜백 함수**
